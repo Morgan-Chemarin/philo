@@ -3,15 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   initialization.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dev <dev@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: mchemari <mchemari@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 16:01:14 by dev               #+#    #+#             */
-/*   Updated: 2025/09/28 12:02:45 by dev              ###   ########.fr       */
+/*   Updated: 2025/09/28 20:25:28 by mchemari         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/philo.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 static int	init_philos(t_data *data)
 {
@@ -62,13 +63,8 @@ static int	init_mutexs(t_data *data)
 	return (1);
 }
 
-int	init_data(t_data *data, int argc, char **argv)
+static void	set_initial_state(t_data *data)
 {
-	if (!check_args(data, argc, argv))
-		return (0);
-	data->philos = malloc(sizeof(t_philo) * data->nb_philos);
-	if (!data->philos)
-		return (0);
 	data->dead_flag = 0;
 	data->philo_ready = false;
 	data->initialized_forks = 0;
@@ -76,8 +72,28 @@ int	init_data(t_data *data, int argc, char **argv)
 	data->print_lock_initialized = false;
 	data->dead_lock_initialized = false;
 	data->ready_lock_initialized = false;
-	if (!init_mutexs(data) || !init_philos(data))
+}
+
+int	init_data(t_data *data, int argc, char **argv)
+{
+	if (!check_args(data, argc, argv))
+		return (0);
+	data->philos = malloc(sizeof(t_philo) * data->nb_philos);
+	if (!data->philos)
 	{
+		printf("Error: malloc failed for philos\n");
+		return (0);
+	}
+	set_initial_state(data);
+	if (!init_mutexs(data))
+	{
+		printf("Error: mutex initialization failed");
+		destroy_all(data);
+		return (0);
+	}
+	if (!init_philos(data))
+	{
+		printf("Error: philo initialization failed\n");
 		destroy_all(data);
 		return (0);
 	}

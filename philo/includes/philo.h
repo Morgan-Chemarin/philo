@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philo.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dev <dev@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: mchemari <mchemari@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 15:53:11 by dev               #+#    #+#             */
-/*   Updated: 2025/09/28 12:44:24 by dev              ###   ########.fr       */
+/*   Updated: 2025/09/28 21:48:26 by mchemari         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,5 +85,8 @@ void		ft_usleep(long long time, t_data *data);
 
 // cleanup.c
 void		destroy_all(t_data *data);
+
+// monitor.c
+void		*monitoring(void *arg);
 
 #endif

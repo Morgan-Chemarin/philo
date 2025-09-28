@@ -14,7 +14,8 @@ SRCS_FILES	= main.c \
               initialization.c \
               utils.c \
               routine.c \
-              simulation.c
+              simulation.c \
+              monitor.c
 
 HEADER_FILES = philo.h
 

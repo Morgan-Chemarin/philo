@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dev <dev@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: mchemari <mchemari@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 16:16:35 by dev               #+#    #+#             */
-/*   Updated: 2025/09/28 11:56:18 by dev              ###   ########.fr       */
+/*   Updated: 2025/09/28 20:05:35 by mchemari         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,13 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <limits.h>
 
 int	ft_atoi(const char *str)
 {
-	int	i;
-	int	sign;
-	int	result;
+	int		i;
+	int		sign;
+	long	result;
 
 	i = 0;
 	sign = 1;
@@ -35,9 +36,13 @@ int	ft_atoi(const char *str)
 	while (str[i] >= '0' && str[i] <= '9')
 	{
 		result = result * 10 + (str[i] - '0');
+		if (result > INT_MAX && sign == 1)
+			return (-1);
+		if (result > (long)INT_MAX + 1 && sign == -1)
+			return (0);
 		i++;
 	}
-	return (result * sign);
+	return ((int)(result * sign));
 }
 
 int	is_dead(t_philo *philo)

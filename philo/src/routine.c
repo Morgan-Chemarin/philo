@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   routine.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dev <dev@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: mchemari <mchemari@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 20:29:36 by mchemari          #+#    #+#             */
-/*   Updated: 2025/09/28 12:42:12 by dev              ###   ########.fr       */
+/*   Updated: 2025/09/28 21:27:02 by mchemari         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,43 +38,45 @@ static void	release_fork(t_fork *fork)
 	pthread_mutex_unlock(&fork->mutex);
 }
 
-static void	philo_eat(t_philo *philo)
+static int	philo_eat(t_philo *philo)
 {
-	print_status(philo, "is thinking");
 	take_fork(philo->left_fork, philo);
 	if (philo->data->nb_philos == 1)
 	{
 		ft_usleep(philo->data->t_die, philo->data);
 		release_fork(philo->left_fork);
-		return ;
+		return (0);
 	}
 	take_fork(philo->right_fork, philo);
+	print_status(philo, "is eating");
+	ft_usleep(philo->data->t_eat, philo->data);
 	pthread_mutex_lock(&philo->meal_lock);
 	philo->last_meal_time = get_time();
 	philo->meals_eaten++;
 	pthread_mutex_unlock(&philo->meal_lock);
-	print_status(philo, "is eating");
-	ft_usleep(philo->data->t_eat, philo->data);
 	release_fork(philo->right_fork);
 	release_fork(philo->left_fork);
+	return (1);
 }
 
 static void	*run_routine(t_philo *philo)
 {
+	if (philo->data->nb_philos != 1)
+		print_status(philo, "is thinking");
 	if (philo->id % 2 != 1)
 	{
-		print_status(philo, "is thinking");
-		ft_usleep(philo->data->t_eat * 2 - philo->data->t_sleep, philo->data);
+		ft_usleep(philo->data->t_eat / 2, philo->data);
 	}
 	while (!is_dead(philo) && (philo->data->must_eat < 0
 			|| philo->meals_eaten < philo->data->must_eat))
 	{
-		philo_eat(philo);
+		if (!philo_eat(philo))
+			break ;
 		if (is_dead(philo))
 			break ;
 		print_status(philo, "is sleeping");
 		ft_usleep(philo->data->t_sleep, philo->data);
-		// print_status(philo, "is thinking");
+		print_status(philo, "is thinking");
 	}
 	return (NULL);
 }
@@ -90,6 +92,8 @@ void	*philo_routine(void *arg)
 	ready = false;
 	while (!ready)
 	{
+		if (is_dead(philo))
+			return (NULL);
 		pthread_mutex_lock(&data->ready_lock);
 		ready = data->philo_ready;
 		pthread_mutex_unlock(&data->ready_lock);

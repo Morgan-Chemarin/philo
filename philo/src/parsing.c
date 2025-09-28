@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parsing.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dev <dev@student.42.fr>                    +#+  +:+       +#+        */
+/*   By: mchemari <mchemari@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 16:49:36 by dev               #+#    #+#             */
-/*   Updated: 2025/09/28 12:05:17 by dev              ###   ########.fr       */
+/*   Updated: 2025/09/28 17:17:49 by mchemari         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ static int	check_valid_number(char *to_convert, int *data, char *error_msg)
 {
 	int	nb;
 
-	if (!is_number(to_convert)) // check_overflow ?
+	if (!is_number(to_convert))
 	{
 		printf("%s", error_msg);
 		return (0);
@@ -59,7 +59,7 @@ int	check_args(t_data *data, int argc, char **argv)
 {
 	if (!check_valid_number(argv[1], &data->nb_philos, ERR_NB_PHILOS))
 		return (0);
-	if (data->nb_philos == 0)
+	if (data->nb_philos == 0 || data->nb_philos > 500)
 	{
 		printf("%s", ERR_NB_PHILOS);
 		return (0);
