@@ -6,7 +6,7 @@
 /*   By: dev <dev@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 20:29:36 by mchemari          #+#    #+#             */
-/*   Updated: 2025/09/28 12:07:45 by dev              ###   ########.fr       */
+/*   Updated: 2025/09/28 12:42:12 by dev              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ static void	philo_eat(t_philo *philo)
 	if (philo->data->nb_philos == 1)
 	{
 		ft_usleep(philo->data->t_die, philo->data);
-		pthread_mutex_unlock(&philo->left_fork->mutex);
+		release_fork(philo->left_fork);
 		return ;
 	}
 	take_fork(philo->right_fork, philo);
@@ -57,6 +57,26 @@ static void	philo_eat(t_philo *philo)
 	ft_usleep(philo->data->t_eat, philo->data);
 	release_fork(philo->right_fork);
 	release_fork(philo->left_fork);
+}
+
+static void	*run_routine(t_philo *philo)
+{
+	if (philo->id % 2 != 1)
+	{
+		print_status(philo, "is thinking");
+		ft_usleep(philo->data->t_eat * 2 - philo->data->t_sleep, philo->data);
+	}
+	while (!is_dead(philo) && (philo->data->must_eat < 0
+			|| philo->meals_eaten < philo->data->must_eat))
+	{
+		philo_eat(philo);
+		if (is_dead(philo))
+			break ;
+		print_status(philo, "is sleeping");
+		ft_usleep(philo->data->t_sleep, philo->data);
+		// print_status(philo, "is thinking");
+	}
+	return (NULL);
 }
 
 void	*philo_routine(void *arg)
@@ -75,20 +95,5 @@ void	*philo_routine(void *arg)
 		pthread_mutex_unlock(&data->ready_lock);
 		usleep(100);
 	}
-	if (philo->id % 2 != 1)
-	{
-		print_status(philo, "is thinking");
-		ft_usleep(data->t_eat * 2 - data->t_sleep, data);
-	}
-	while (!is_dead(philo) && (data->must_eat < 0
-			|| philo->meals_eaten < data->must_eat))
-	{
-		philo_eat(philo);
-		if (is_dead(philo))
-			break ;
-		print_status(philo, "is sleeping");
-		ft_usleep(data->t_sleep, data);
-		// print_status(philo, "is thinking");
-	}
-	return (NULL);
+	return (run_routine(philo));
 }
