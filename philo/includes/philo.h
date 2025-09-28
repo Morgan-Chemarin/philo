@@ -6,7 +6,7 @@
 /*   By: dev <dev@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 15:53:11 by dev               #+#    #+#             */
-/*   Updated: 2025/09/28 11:52:23 by dev              ###   ########.fr       */
+/*   Updated: 2025/09/28 12:44:24 by dev              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@
 # include <pthread.h>
 # include <stdbool.h>
 
-typedef struct s_data t_data;
+typedef struct s_data	t_data;
 
 typedef struct s_fork
 {
