@@ -6,12 +6,14 @@
 /*   By: dev <dev@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 16:16:35 by dev               #+#    #+#             */
-/*   Updated: 2025/09/25 17:27:33 by dev              ###   ########.fr       */
+/*   Updated: 2025/09/28 11:56:18 by dev              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/philo.h"
 #include <sys/time.h>
+#include <unistd.h>
+#include <stdio.h>
 
 int	ft_atoi(const char *str)
 {
@@ -38,10 +40,48 @@ int	ft_atoi(const char *str)
 	return (result * sign);
 }
 
+int	is_dead(t_philo *philo)
+{
+	pthread_mutex_lock(&philo->data->dead_lock);
+	if (philo->data->dead_flag)
+	{
+		pthread_mutex_unlock(&philo->data->dead_lock);
+		return (1);
+	}
+	pthread_mutex_unlock(&philo->data->dead_lock);
+	return (0);
+}
+
+void	print_status(t_philo *philo, char *status)
+{
+	long long	time;
+
+	pthread_mutex_lock(&philo->data->print_lock);
+	if (!is_dead(philo))
+	{
+		time = get_time() - philo->data->start_time;
+		printf("%lld %d %s\n", time, philo->id, status);
+	}
+	pthread_mutex_unlock(&philo->data->print_lock);
+}
+
 long long	get_time(void)
 {
-    struct timeval	tv;
+	struct timeval	tv;
 
-    gettimeofday(&tv, NULL);
-    return ((tv.tv_sec * 1000) + (tv.tv_usec / 1000));
+	gettimeofday(&tv, NULL);
+	return ((tv.tv_sec * 1000) + (tv.tv_usec / 1000));
+}
+
+void	ft_usleep(long long time, t_data *data)
+{
+	long long	start;
+
+	start = get_time();
+	while ((get_time() - start) < time)
+	{
+		if (is_dead(data->philos))
+			break ;
+		usleep(50);
+	}
 }

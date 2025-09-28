@@ -6,7 +6,7 @@
 /*   By: dev <dev@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/25 16:01:14 by dev               #+#    #+#             */
-/*   Updated: 2025/09/25 19:21:11 by dev              ###   ########.fr       */
+/*   Updated: 2025/09/28 12:02:45 by dev              ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,53 +15,51 @@
 
 static int	init_philos(t_data *data)
 {
-    int	i;
+	int	i;
 
-    i = 0;
-    while (i < data->nb_philos)
-    {
-        data->philos[i].id = i + 1;
-        data->philos[i].meals_eaten = 0;
-        data->philos[i].last_meal_time = -1;
-        data->philos[i].data = data;
-        if (pthread_mutex_init(&data->philos[i].meal_lock, NULL) != 0)
-        {
-            while (--i >= 0)
-                pthread_mutex_destroy(&data->philos[i].meal_lock);
-            return (0);
-        }
-        data->philos[i].left_fork = &data->forks[i];
-        data->philos[i].right_fork = &data->forks[(i + 1) % data->nb_philos];
-        i++;
-    }
-    return (1);
+	i = 0;
+	while (i < data->nb_philos)
+	{
+		data->philos[i].id = i + 1;
+		data->philos[i].meals_eaten = 0;
+		data->philos[i].last_meal_time = 0;
+		data->philos[i].data = data;
+		if (pthread_mutex_init(&data->philos[i].meal_lock, NULL) != 0)
+			return (0);
+		data->initialized_philos++;
+		data->philos[i].left_fork = &data->forks[i];
+		data->philos[i].right_fork = &data->forks[(i + 1) % data->nb_philos];
+		i++;
+	}
+	return (1);
 }
 
 static int	init_mutexs(t_data *data)
 {
-    int	i;
+	int	i;
 
-    data->forks = malloc(sizeof(t_fork) * data->nb_philos);
-    if (!data->forks)
-        return (0);
-    i = 0;
-    while (i < data->nb_philos)
-    {
-        if (pthread_mutex_init(&data->forks[i].mutex, NULL) != 0)
-        {
-			while (--i >= 0)
-                pthread_mutex_destroy(&data->forks[i].mutex);
-            free(data->forks);
-            return (0);
-		}
-        data->forks[i].is_taken = false;
-        i++;
-    }
-    if (pthread_mutex_init(&data->print_lock, NULL) != 0)
+	data->forks = malloc(sizeof(t_fork) * data->nb_philos);
+	if (!data->forks)
 		return (0);
-    if (pthread_mutex_init(&data->dead_lock, NULL) != 0)
+	i = 0;
+	while (i < data->nb_philos)
+	{
+		if (pthread_mutex_init(&data->forks[i].mutex, NULL) != 0)
+			return (0);
+		data->initialized_forks++;
+		data->forks[i].is_taken = false;
+		i++;
+	}
+	if (pthread_mutex_init(&data->print_lock, NULL) != 0)
 		return (0);
-    return (1);
+	data->print_lock_initialized = true;
+	if (pthread_mutex_init(&data->dead_lock, NULL) != 0)
+		return (0);
+	data->dead_lock_initialized = true;
+	if (pthread_mutex_init(&data->ready_lock, NULL) != 0)
+		return (0);
+	data->ready_lock_initialized = true;
+	return (1);
 }
 
 int	init_data(t_data *data, int argc, char **argv)
@@ -73,11 +71,15 @@ int	init_data(t_data *data, int argc, char **argv)
 		return (0);
 	data->dead_flag = 0;
 	data->philo_ready = false;
-	if (!init_mutexs(data))
-    {
-        free(data->philos);
-        return (0);
-    }
-    init_philos(data);
+	data->initialized_forks = 0;
+	data->initialized_philos = 0;
+	data->print_lock_initialized = false;
+	data->dead_lock_initialized = false;
+	data->ready_lock_initialized = false;
+	if (!init_mutexs(data) || !init_philos(data))
+	{
+		destroy_all(data);
+		return (0);
+	}
 	return (1);
 }
